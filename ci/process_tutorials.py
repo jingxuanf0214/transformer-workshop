@@ -137,7 +137,7 @@ def extract_solutions_and_hints(nb, nb_dir, nb_name):
                 # Convert the solution cell to markdown,
                 # Insert a link to the solution snippet script on github
                 py_url = f"{GITHUB_URL}/{py_fname}"
-                hint_text = cell_source.split("\n")[0]
+                hint_text = cell_source.split("\n")[0].replace('*', '').lower()
                 new_source = f"[*Click for {hint_text}*]({py_url})\n\n"
 
 
@@ -165,10 +165,13 @@ def remove_code_exercises(nb, nb_dir, nb_name):
         cell_text = cell["source"].replace(" ", "").lower()
         has_code_exercise = cell_text.startswith("#solution") or cell_text.startswith("##solution")
         if has_code_exercise:
-            if nb_cells[i-1]["cell_type"] == "markdown":
-                cell_id = i-2
-            else:
-                cell_id = i-1
+            is_markdown = True
+            cell_id = i
+            while is_markdown:
+                
+                is_markdown = nb_cells[cell_id-1]["cell_type"] == "markdown"
+                cell_id -= 1
+
             nb_cells[cell_id]["cell_type"] = "markdown"
             nb_cells[cell_id]["metadata"]["colab_type"] = "text"
             if "outputID" in nb_cells[cell_id]["metadata"]:
